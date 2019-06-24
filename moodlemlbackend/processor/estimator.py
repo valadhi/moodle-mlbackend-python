@@ -11,7 +11,7 @@ import json
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 import numpy as np
-from sklearn.cross_validation import train_test_split
+from sklearn.model_selection import train_test_split
 from sklearn.metrics import roc_curve, auc
 import tensorflow as tf
 
@@ -21,6 +21,7 @@ from .. import chart
 from sklearn.utils import shuffle
 from sklearn.externals import joblib
 
+tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 
 OK = 0
 GENERAL_ERROR = 1

@@ -47,11 +47,11 @@ setup(
     package_data={
         'moodlemlbackend': ['VERSION']
     },
+    # Versions compatible with both python ==2.7 and >=3.5,<3.7. (not tested on 3.7 or higher).
     install_requires=[
         'matplotlib>=1.5.0,<1.6',
-        'numpy>=1.11.0,<1.12',
-        'scikit-learn>=0.17.0,<0.18',
-        'scipy>=0.17.0,<0.18',
-        'tensorflow>=1.0.0,<1.1',
+        'numpy>=1.16.0,<1.17',
+        'scikit-learn>=0.20,<0.21',
+        'tensorflow>=1.14.0,<1.15',
     ],
 )
