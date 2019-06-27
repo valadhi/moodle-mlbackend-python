@@ -3,6 +3,7 @@
 from __future__ import print_function
 import os
 
+
 def print_version():
     """Prints moodlemlbackend package version"""
 

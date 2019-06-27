@@ -412,6 +412,10 @@ class Binary(Estimator):
                 X_train, X_test, y_train, y_test = train_test_split(self.X,
                                                                     self.y,
                                                                     test_size=0.2)
+                if len(np.unique(y_train)) < 2:
+                    # We need the input data to match the expected size of the
+                    # tensor.
+                    continue
 
                 classifier = self.train(X_train, y_train)
 
@@ -532,8 +536,11 @@ class Binary(Estimator):
         avg_accuracy = np.mean(self.accuracies)
         avg_precision = np.mean(self.precisions)
         avg_recall = np.mean(self.recalls)
-        avg_aucs = np.mean(self.aucs)
         avg_phi = np.mean(self.phis)
+        if len(self.aucs) > 0:
+            avg_aucs = np.mean(self.aucs)
+        else:
+            avg_aucs = 0
 
         # Phi goes from -1 to 1 we need to transform it to a value between
         # 0 and 1 to compare it with the minimum score provided.
@@ -544,7 +551,11 @@ class Binary(Estimator):
         result['accuracy'] = avg_accuracy
         result['precision'] = avg_precision
         result['recall'] = avg_recall
-        result['auc_deviation'] = np.std(self.aucs)
+        if len(self.aucs) > 0:
+            result['auc_deviation'] = np.std(self.aucs)
+        else:
+            result['auc_deviation'] = 1
+
         result['score'] = score
         result['min_score'] = min_score
         result['accepted_deviation'] = accepted_deviation
@@ -555,7 +566,7 @@ class Binary(Estimator):
 
         # If deviation is too high we may need more records to report if
         # this model is reliable or not.
-        auc_deviation = np.std(self.aucs)
+        auc_deviation = result['auc_deviation']
         if auc_deviation > accepted_deviation:
             result['info'].append('The evaluation results varied too much, ' +
                                   'we need more samples to check if this ' +
