@@ -591,8 +591,4 @@ class Binary(Estimator):
         if auc_deviation > accepted_deviation and score < min_score:
             result['status'] = LOW_SCORE + NOT_ENOUGH_DATA
 
-        result['info'].append('Launch TensorBoard from command line by ' +
-                              'typing: tensorboard --logdir=\'' +
-                              self.get_tensor_logdir() + '\'')
-
         return result
