@@ -198,8 +198,7 @@ class Estimator(object):
         self.accuracies = []
         self.precisions = []
         self.recalls = []
-        self.mccs = []
-
+        self.f1_scores = []
 
 class Classifier(Estimator):
     """General classifier"""
@@ -414,35 +413,11 @@ class Classifier(Estimator):
             self.roc_curve_plot.add(fpr, tpr, 'Positives')
 
         # Calculate accuracy, sensitivity and specificity.
-        mcc = self.get_mcc(y_test, y_pred)
-
-        [acc, prec, rec] = self.calculate_metrics(y_test == 1, y_pred == 1)
-
+        [acc, prec, rec, f1_score] = self.calculate_metrics(y_test == 1, y_pred == 1)
         self.accuracies.append(acc)
         self.precisions.append(prec)
         self.recalls.append(rec)
-        self.mccs.append(mcc)
-
-    @staticmethod
-    def get_mcc(y_true, y_pred):
-        C = confusion_matrix(y_true, y_pred)
-        t_sum = C.sum(axis=1, dtype=np.float64)
-        p_sum = C.sum(axis=0, dtype=np.float64)
-        n_correct = np.trace(C, dtype=np.float64)
-        n_samples = p_sum.sum()
-        cov_ytyp = n_correct * n_samples - np.dot(t_sum, p_sum)
-        cov_ypyp = n_samples ** 2 - np.dot(p_sum, p_sum)
-        cov_ytyt = n_samples ** 2 - np.dot(t_sum, t_sum)
-        denominator = np.sqrt(cov_ytyt * cov_ypyp)
-        if denominator != 0:
-            mcc = cov_ytyp / np.sqrt(cov_ytyt * cov_ypyp)
-        else:
-            return 0.
-
-        if np.isnan(mcc):
-            return 0.
-        else:
-            return mcc
+        self.f1_scores.append(f1_score)
 
     @staticmethod
     def get_score(classifier, X_test, y_test):
@@ -481,7 +456,12 @@ class Classifier(Estimator):
         else:
             recall = 0
 
-        return [accuracy, precision, recall]
+        if precision + recall != 0:
+            f1_score = 2 * precision * recall / (precision + recall)
+        else:
+            f1_score = 0
+
+        return [accuracy, precision, recall, f1_score]
 
     def get_evaluation_results(self, min_score, accepted_deviation):
         """Returns the evaluation results after all iterations"""
@@ -489,13 +469,9 @@ class Classifier(Estimator):
         avg_accuracy = np.mean(self.accuracies)
         avg_precision = np.mean(self.precisions)
         avg_recall = np.mean(self.recalls)
-        avg_mcc = np.mean(self.mccs)
+        score = np.mean(self.f1_scores)
 
-        # MCC goes from -1 to 1 we need to transform it to a value between
-        # 0 and 1 to compare it with the minimum score provided.
-        score = (avg_mcc + 1) / 2
-
-        acc_deviation = np.std(self.mccs)
+        acc_deviation = np.std(self.f1_scores)
         result = dict()
         if self.is_binary:
             result['auc'] = np.mean(self.aucs)
